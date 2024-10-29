@@ -10,7 +10,7 @@ def obtain_fresh_file_url_from_yandex_disk(public_link: str, path: str):
     api_url = "https://cloud-api.yandex.net/v1/disk/public/resources/download"
     params = {"public_key": public_link, "path": path}
 
-    connect_timeout = 1
+    connect_timeout = 3
     read_timeout = 5
 
     timeout_request = TimeoutRequest(total_timeout=10)

@@ -9,10 +9,10 @@ logger = logging.getLogger("yfiles")
 
 
 def download_url(url: str, _: str | int | None = None):
-    timeout_request = TimeoutRequest(total_timeout=15)
+    timeout_request = TimeoutRequest(total_timeout=20)
 
-    connect_timeout = 1
-    read_timeout = 10
+    connect_timeout = 3
+    read_timeout = 15
 
     # Extract filename from URL or set a default
     filename = generate_filename_from_download_url(url)

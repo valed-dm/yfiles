@@ -18,7 +18,7 @@ def fetch_yandex_disk_content(link: str, folder_path: str = "") -> dict | None:
     api_url = "https://cloud-api.yandex.net/v1/disk/public/resources"
     req_url = f"{api_url}?public_key={link}&path={folder_path}"
 
-    timeout_request = TimeoutRequest(total_timeout=15)
+    timeout_request = TimeoutRequest(total_timeout=10)
 
     connect_timeout = 3
     read_timeout = 5

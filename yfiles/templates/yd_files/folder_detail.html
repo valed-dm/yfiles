@@ -1,0 +1,15 @@
+<h1>Folder: {{ folder_path }}</h1>
+<ul>
+  {% for file in files %}
+    <li>
+      {% if file.type != 'dir' %}
+        <strong>{{ file.name }} ({{ file.type|upper }})</strong>
+        <a href="{{ file.public_link }}" target="_blank">Download</a>
+      {% else %}
+        <a href="{% url 'yd_files:folder_detail' file.path|slice:'1:' %}">{{ file.name }}</a>
+      {% endif %}
+    </li>
+  {% empty %}
+    <p>No files found in this folder.</p>
+  {% endfor %}
+</ul>

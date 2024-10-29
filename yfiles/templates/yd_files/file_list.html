@@ -1,0 +1,32 @@
+<form method="post" action="{% url 'yd_files:bulk_download' %}">
+  {% csrf_token %}
+  <table>
+    <thead>
+      <tr>
+        <th>Select</th>
+        <th>Filename</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for folder in folders %}
+        <li>
+          <a href="{% url 'yd_files:folder_detail' folder.path|slice:'1:' %}">{{ folder.name }}</a>
+        </li>
+      {% endfor %}
+      {% for file in files %}
+        <tr>
+          <td>
+            <label for='selected_files'>
+              Selected files:
+              <input type="checkbox" name="selected_files" value="{{ file.id }}" />
+            </label>
+          </td>
+          <td>
+            <a href="{% url 'yd_files:file_detail' file.id %}">{{ file.name }}</a>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <button type="submit">Download Selected</button>
+</form>

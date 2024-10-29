@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>File List</title>
+  </head>
+  <body>
+    <h1>Files from Yandex Disk</h1>
+    <ul>
+      {% for file in files %}
+        <li>
+          {% if file.type == 'dir' %}
+            <a href="{% url 'yd_files:folder_detail' file.path|slice:'1:' %}">{{ file.name }} ({{ file.type|upper }})</a>
+          {% else %}
+            <strong>{{ file.name }} ({{ file.type|upper }})</strong>
+          {% endif %}
+          <ul>
+            {% if file.type != "dir" %}
+              <li>
+                File URL: <a href="{{ file.file_url }}" target="_blank">
+                {{ file.file_url|slice:":50" }}
+                {% if file.file_url|length > 50 %}...{% endif %}
+              }</a>
+            </li>
+            <li>MIME Type: {{ file.mime_type }}</li>
+            <li>Size: ({{ file.size }} bytes)</li>
+          {% endif %}
+          <li>Created: {{ file.created }}</li>
+          <li>Modified: {{ file.modified }}</li>
+          {% if file.type != "dir" %}
+            <li>
+              Previews:
+              <ul>
+                {% for preview in file.previews.all %}
+                  <li>
+                    {{ preview.size_name }}: <a href="{{ preview.preview_url }}" target="_blank">
+                    {{ preview.preview_url|slice:":50" }}
+                    {% if preview.preview_url|length > 50 %}...{% endif %}
+                  }</a>
+                </li>
+              {% endfor %}
+            </ul>
+          </li>
+        {% endif %}
+      </ul>
+    </li>
+  {% endfor %}
+</ul>
+</body>
+</html>

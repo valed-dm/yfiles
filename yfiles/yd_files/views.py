@@ -1,3 +1,5 @@
+import logging
+from time import time
 from urllib.parse import quote
 
 from django.db.models.query_utils import Q
@@ -13,6 +15,8 @@ from yfiles.yd_files.utils.download_url import download_url
 from yfiles.yd_files.utils.fetch_yandex_disk_content import fetch_yandex_disk_content
 from yfiles.yd_files.utils.obtain_url import obtain_fresh_file_url_from_yandex_disk
 from yfiles.yd_files.utils.save_file_and_previews import save_file_and_previews
+
+logger = logging.getLogger("yfiles")
 
 
 def public_access_link_form_view(request) -> HttpResponse:
@@ -151,14 +155,26 @@ def bulk_download_view(request) -> HttpResponse:
         # Prepare a list of (public_link, path) tuples for obtaining fresh URLs
         file_data = [(file.public_link, file.path) for file in files_to_download]
 
+        start_url_fetch_time = time()
         # Obtain fresh URLs in parallel
         fresh_urls = download_parallel(
             obtain_fresh_file_url_from_yandex_disk,
             file_data,
         )
+        url_fetch_duration = time() - start_url_fetch_time
+        logger.info(
+            "Total elapsed time for obtaining fresh URLs: %0.2f seconds",
+            url_fetch_duration,
+        )
 
+        start_download_time = time()
         # Download files concurrently using the fresh URLs
         download_parallel(download_url, fresh_urls)
+        download_duration = time() - start_download_time
+        logger.info(
+            "Total elapsed time for downloading files: %0.2f seconds",
+            download_duration,
+        )
 
         return HttpResponse("Files downloaded successfully.")
 

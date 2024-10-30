@@ -9,7 +9,7 @@ logger = logging.getLogger("yfiles")
 def download_parallel(function, items):
     """
     Downloads files or obtains URLs in parallel using a specified function,
-    with accurate timing for the download phase.
+    with detailed timing logs for each phase.
 
     Args:
         function (callable): The function to call for each item
@@ -22,35 +22,42 @@ def download_parallel(function, items):
     cpus = cpu_count()
     pool = ThreadPool(cpus - 2)
 
-    # Start total timer for the download phase
+    # Start total timer for the entire parallel execution phase
     start_total_time = time()
+    logger.info("Starting download_parallel with %d items", len(items))
+
     results = pool.imap_unordered(lambda args: function(*args), items)
 
     processed_results = []
     individual_durations_sum = 0  # For summing individual download times
 
-    for result in results:
+    # Measure individual item processing start and end times
+    for _, result in enumerate(results, start=1):
+        item_start_time = time()  # Track the start time of each item
         processed_results.append(result)
         path_or_filename, duration_or_error = result
 
-        # Check if the result is an error or a duration (float)
+        # Calculate individual item processing duration
+        item_elapsed_time = time() - item_start_time
+
         if isinstance(duration_or_error, str):
             logger.error(
-                "Failed to process %s: %s",
+                "Failed to process %s: %s (item took %0.5f seconds)",
                 path_or_filename,
                 duration_or_error,
+                item_elapsed_time,
             )
         else:
             individual_durations_sum += duration_or_error
             logger.info(
-                "Processed %s in %0.2f seconds",
+                "Processed %s in %0.2f seconds (actual processing took %0.5f seconds)",
                 path_or_filename,
                 duration_or_error,
+                item_elapsed_time,
             )
 
     # End total timer after processing all results
     total_elapsed_time = time() - start_total_time
-
     pool.close()
     pool.join()
 

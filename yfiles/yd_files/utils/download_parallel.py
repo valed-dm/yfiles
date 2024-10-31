@@ -25,7 +25,8 @@ def download_parallel(function, items):
     processed_results = []
     for result in results:
         processed_results.append(result)
-        path_or_filename, duration_or_error = result
+        path_or_filename = result[0]
+        duration_or_error = result[1]
         if isinstance(duration_or_error, str):
             logger.error(
                 "Failed to process %s: %s",

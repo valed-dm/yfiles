@@ -8,10 +8,8 @@ from django.shortcuts import render
 
 from yfiles.yd_files.forms import YandexDiskPublicAccessLinkForm
 from yfiles.yd_files.models import File
-from yfiles.yd_files.utils.download_parallel import download_parallel
-from yfiles.yd_files.utils.download_url import download_url
+from yfiles.yd_files.utils.download_manager import FileDownloadManager
 from yfiles.yd_files.utils.fetch_yandex_disk_content import fetch_yandex_disk_content
-from yfiles.yd_files.utils.obtain_url import obtain_fresh_file_url_from_yandex_disk
 from yfiles.yd_files.utils.save_file_and_previews import save_file_and_previews
 
 
@@ -146,19 +144,10 @@ def folder_detail_view(request, folder_path: str) -> HttpResponse:
 def bulk_download_view(request) -> HttpResponse:
     if request.method == "POST":
         selected_file_ids = request.POST.getlist("selected_files")
-        files_to_download = File.objects.filter(id__in=selected_file_ids)
+        manager = FileDownloadManager(selected_file_ids)
 
-        # Prepare a list of (public_link, path) tuples for obtaining fresh URLs
-        file_data = [(file.public_link, file.path) for file in files_to_download]
-
-        # Obtain fresh URLs in parallel
-        fresh_urls = download_parallel(
-            obtain_fresh_file_url_from_yandex_disk,
-            file_data,
-        )
-
-        # Download files concurrently using the fresh URLs
-        download_parallel(download_url, fresh_urls)
+        # Execute download based on the size criteria
+        manager.download_files()
 
         return HttpResponse("Files downloaded successfully.")
 

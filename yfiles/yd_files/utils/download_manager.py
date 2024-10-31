@@ -70,4 +70,5 @@ class FileDownloadManager:
                 download_url(url)
         else:
             # Download small files in parallel
+            logger.info("Parallel downloading %d files", len(small_files))
             download_parallel(download_url, [(url,) for url in small_files])

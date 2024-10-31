@@ -2,7 +2,9 @@
 
 from django.db import models
 
-from yfiles.yd_files.utils.obtain_url import obtain_fresh_file_url_from_yandex_disk
+from yfiles.yd_files.utils.obtain_fresh_download_url import (
+    obtain_fresh_file_download_url,
+)
 
 
 class File(models.Model):
@@ -42,7 +44,7 @@ class File(models.Model):
 
     def get_file_url(self):
         # Logic to get file_url dynamically from Yandex Disk API
-        return obtain_fresh_file_url_from_yandex_disk(
+        return obtain_fresh_file_download_url(
             public_link=self.public_link,
             path=self.path,
         )

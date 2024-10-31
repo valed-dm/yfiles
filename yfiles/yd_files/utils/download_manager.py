@@ -22,7 +22,8 @@ class FileDownloadManager:
         self.files_to_download = File.objects.filter(id__in=selected_file_ids)
         self.size_threshold = size_threshold
         self.file_data = [
-            (file.public_link, file.path, file.size) for file in self.files_to_download
+            (file.public_link, file.path, file.size, file.id)
+            for file in self.files_to_download
         ]
         self.fresh_urls_with_size = self._obtain_fresh_urls_with_size()
         self.available_cores = cpu_count()
@@ -31,12 +32,12 @@ class FileDownloadManager:
         # Obtain fresh URLs in parallel and pair with sizes
         fresh_urls = download_parallel(
             obtain_fresh_file_download_url,
-            [(fd[0], fd[1]) for fd in self.file_data],
+            # fd[0] is the link, fd[1] is the path, fd[3] is the unique ID
+            [(fd[0], fd[1], fd[3]) for fd in self.file_data],
         )
-        return [
-            (fresh_url[0], self.file_data[i][2])
-            for i, fresh_url in enumerate(fresh_urls)
-        ]
+        # Use the fresh_url[2] unique ID as the key
+        fresh_urls_by_id = {fresh_url[2]: fresh_url[0] for fresh_url in fresh_urls}
+        return [(fresh_urls_by_id[fd[3]], fd[2]) for fd in self.file_data]
 
     def get_large_files(self) -> list[str]:
         # Extract URLs for large files based on the size threshold

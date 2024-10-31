@@ -8,7 +8,7 @@ from yfiles.yd_files.utils.timeout_requests import TimeoutRequest
 logger = logging.getLogger("yfiles")
 
 
-@shared_task
+@shared_task(soft_time_limit=300, time_limit=360)
 def download_file_in_background(url, filename, directory="YD_Down"):
     """Downloads a file from the provided URL and saves it
     to the specified directory.

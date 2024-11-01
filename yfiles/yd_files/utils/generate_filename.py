@@ -4,7 +4,7 @@ from urllib.parse import parse_qs
 from urllib.parse import urlparse
 
 
-def generate_filename_from_download_url(url):
+def generate_filename_from_download_url(url: str) -> str:
     """
     Generates a file name based on the download URL, using available query parameters
     or the URL path if no filename is specified in the query.

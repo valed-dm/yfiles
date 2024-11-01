@@ -67,8 +67,16 @@ class FileDownloadManager:
         if len(small_files) <= self.available_cores:
             # Download small files sequentially
             for url in small_files:
-                download_url(url)
+                filename = generate_filename_from_download_url(url)
+                logger.info("Downloaded %s sequentially", filename)
+                download_url(url=url, filename=filename)
         else:
             # Download small files in parallel
             logger.info("Parallel downloading %d files", len(small_files))
-            download_parallel(download_url, [(url,) for url in small_files])
+            download_parallel(
+                download_url,
+                [(
+                    url,
+                    generate_filename_from_download_url(url),
+                ) for url in small_files],
+            )

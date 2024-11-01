@@ -1,5 +1,4 @@
 from http import HTTPStatus
-from typing import Optional
 
 from yfiles.yd_files.utils.timeout_requests import TimeoutRequest
 
@@ -22,7 +21,7 @@ def fetch_yandex_disk_content(link: str, folder_path: str = "") -> dict | None:
     req_url = f"{api_url}?public_key={link}&path={folder_path}"
 
     timeout_request = TimeoutRequest(total_timeout=20)
-    connect_timeout,  read_timeout = 5, 15
+    connect_timeout, read_timeout = 5, 15
 
     response = timeout_request.get(req_url, timeout=(connect_timeout, read_timeout))
 

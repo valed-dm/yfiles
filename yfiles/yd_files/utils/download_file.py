@@ -21,8 +21,7 @@ def download_url(url: str, filename: str) -> tuple[str, float | str]:
             duration in seconds (if successful) or an error message.
     """
     timeout_request = TimeoutRequest(total_timeout=20)
-    connect_timeout = 5
-    read_timeout = 15
+    connect_timeout, read_timeout = 5, 15
 
     response = timeout_request.get(url, timeout=(connect_timeout, read_timeout))
 

@@ -7,7 +7,19 @@ from yfiles.yd_files.utils.timeout_requests import TimeoutRequest
 logger = logging.getLogger("yfiles")
 
 
-def download_url(url: str, filename: str | None = None):
+def download_url(url: str, filename: str) -> tuple[str, float | str]:
+    """
+    Downloads a file from the specified URL, saving it to disk if the request is
+    successful.
+
+    Args:
+        url (str): The URL of the file to download.
+        filename (str): The name to save the file as.
+
+    Returns:
+        tuple[str, float | str]: A tuple with the filename and either the download
+            duration in seconds (if successful) or an error message.
+    """
     timeout_request = TimeoutRequest(total_timeout=20)
     connect_timeout = 5
     read_timeout = 15

@@ -1,3 +1,5 @@
+"""Unused module"""
+
 import sys
 
 

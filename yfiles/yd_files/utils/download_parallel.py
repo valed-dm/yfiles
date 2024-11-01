@@ -7,9 +7,9 @@ logger = logging.getLogger("yfiles")
 
 
 def download_parallel(
-    function: Callable[..., tuple[str, float | str]],
+    function: Callable[..., tuple[str, float | str, int | None]],
     items: list[tuple[any, ...]],
-) -> list[tuple[str, float | str]]:
+) -> list[tuple[str, float | str, int | None]]:
     """
     Processes items in parallel by applying a specified function to each item.
     Often used to download files or obtain fresh URLs in parallel.

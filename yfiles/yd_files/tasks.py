@@ -10,7 +10,9 @@ logger = logging.getLogger("yfiles")
 
 @shared_task(soft_time_limit=300, time_limit=360)
 def download_file_in_background(
-    url: str, filename: str, directory: str = "YD_Down",
+    url: str,
+    filename: str,
+    directory: str = "YD_Down",
 ) -> str | None:
     """
     Downloads a file from the provided URL and saves it to the specified directory.

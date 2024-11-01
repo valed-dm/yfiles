@@ -5,7 +5,9 @@ logger = logging.getLogger("yfiles")
 
 
 def save_to_disk(
-    content: bytes, filename: str, directory: str = "YD_Down",
+    content: bytes,
+    filename: str,
+    directory: str = "YD_Down",
 ) -> Path | None:
     """
     Saves binary content to a specified directory on disk.

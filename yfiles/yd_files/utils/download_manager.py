@@ -114,8 +114,11 @@ class FileDownloadManager:
             logger.info("Parallel downloading %d files", len(small_files))
             download_parallel(
                 download_url,
-                [(
-                    url,
-                    generate_filename_from_download_url(url),
-                ) for url in small_files],
+                [
+                    (
+                        url,
+                        generate_filename_from_download_url(url),
+                    )
+                    for url in small_files
+                ],
             )

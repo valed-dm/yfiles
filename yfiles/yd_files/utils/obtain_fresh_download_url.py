@@ -7,7 +7,9 @@ logger = logging.getLogger("yfiles")
 
 
 def obtain_fresh_file_download_url(
-    public_link: str, path: str, file_id: int,
+    public_link: str,
+    path: str,
+    file_id: int,
 ) -> tuple[str, float | str, int]:
     """
     Obtains a fresh download URL for a file on Yandex Disk.

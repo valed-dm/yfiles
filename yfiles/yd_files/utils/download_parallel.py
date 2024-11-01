@@ -1,21 +1,33 @@
 import logging
+from collections.abc import Callable
 from multiprocessing import cpu_count
 from multiprocessing.pool import ThreadPool
 
 logger = logging.getLogger("yfiles")
 
 
-def download_parallel(function, items):
+def download_parallel(
+    function: Callable[..., tuple[str, float | str]],
+    items: list[tuple[any, ...]],
+) -> list[tuple[str, float | str]]:
     """
-    Downloads files or obtains URLs in parallel using a specified function.
+    Processes items in parallel by applying a specified function to each item.
+    Often used to download files or obtain fresh URLs in parallel.
 
     Args:
-        function (callable): The function to call for each item
-        (e.g., obtain_fresh_file_url, download_url).
-        items (list): A list of items (URLs or data for processing).
+        function (Callable): The function to call for each item, e.g.,
+            `obtain_fresh_file_url` or `download_url`.
+            It should accept parameters in the form of `*args` matching each tuple in
+            `items` and return a tuple containing the path or filename and either
+            a duration in seconds or an error message.
+        items (list): A list of tuples, where each tuple contains arguments for
+            `function`.
 
     Returns:
-        list: Results of the processing.
+        List[Tuple[str, Union[float, str]]]: A list of results from the function,
+            with each entry as a tuple containing the filename or path and either
+            the processing duration or an error message. pool.imap_unordered() returns
+            results as they ready. Synchronization with args passed is necessary.
     """
     cpus = cpu_count()
     pool = ThreadPool(cpus - 1)

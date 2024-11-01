@@ -1,20 +1,16 @@
 import logging
 from http import HTTPStatus
 
-from yfiles.yd_files.utils.generate_filename import generate_filename_from_download_url
 from yfiles.yd_files.utils.save_file_to_disk import save_to_disk
 from yfiles.yd_files.utils.timeout_requests import TimeoutRequest
 
 logger = logging.getLogger("yfiles")
 
 
-def download_url(url: str, _: str | int | None = None):
+def download_url(url: str, filename: str | None = None):
     timeout_request = TimeoutRequest(total_timeout=20)
     connect_timeout = 5
     read_timeout = 15
-
-    # Extract filename from URL or set a default
-    filename = generate_filename_from_download_url(url)
 
     response = timeout_request.get(url, timeout=(connect_timeout, read_timeout))
 

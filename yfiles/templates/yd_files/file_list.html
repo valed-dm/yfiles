@@ -1,3 +1,9 @@
+{% load static %}
+
+<h3>
+  <img src="{% static 'images/folder.svg' %}" alt="folder icon" />
+  &nbsp{{ folder_name }}
+</h3>
 <form method="post" action="{% url 'yd_files:bulk_download' %}">
   {% csrf_token %}
   <table>
@@ -10,7 +16,8 @@
     <tbody>
       {% for folder in folders %}
         <li>
-          <a href="{% url 'yd_files:folder_detail' folder.path|slice:'1:' %}">{{ folder.name }}</a>
+          <img src="{% static 'images/folder.svg' %}" alt="folder icon" />
+          &nbsp<a href="{% url 'yd_files:folder_detail' folder.path|slice:'1:' %}">{{ folder.name }}</a>
         </li>
       {% endfor %}
       {% for file in files %}

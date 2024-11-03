@@ -81,7 +81,7 @@ def file_list_view(request) -> HttpResponse:
     return render(
         request,
         "yd_files/file_list.html",
-        {"files": files, "folders": top_level_folders},
+        {"files": files, "folders": top_level_folders, "folder_name": "/"},
     )
 
 
@@ -116,7 +116,7 @@ def folder_detail_view(request, folder_path: str) -> HttpResponse:
     Returns:
         HttpResponse: Rendered folder detail view or error if folder not found.
     """
-    folder_path = "/" + folder_path
+    folder_path = "/" + folder_path.rstrip("/")
     public_link = request.session.get("public_link")
     folder_path_encoded = quote(folder_path)
 
@@ -124,18 +124,33 @@ def folder_detail_view(request, folder_path: str) -> HttpResponse:
         link=public_link,
         folder_path=folder_path_encoded,
     )
-
     folder_files_data = folder_files_data.get("_embedded", {})
+
     if folder_files_data and "items" in folder_files_data:
         items = folder_files_data.get("items", [])
         save_file_and_previews(file_data_list=items, public_link=public_link)
 
-        # Filter files from the database by folder path
-        files = File.objects.filter(path__startswith=folder_path)
+        # Filter files directly in the subfolder
+        files = File.objects.filter(
+            path__startswith=folder_path + "/",
+            public_link=public_link,
+            # Exclude files within nested subfolders
+        ).exclude(
+            Q(path__regex=rf"^{folder_path}/.*/") | Q(path=folder_path) | Q(type="dir"),
+        )
+
+        # Filter only direct subfolders within the folder
+        folders = File.objects.filter(
+            path__startswith=folder_path + "/",
+            public_link=public_link,
+            type="dir",
+            # Exclude nested folders
+        ).exclude(path__regex=rf"^{folder_path}/.*/.*/")
+
         return render(
             request,
-            "yd_files/folder_detail.html",
-            {"files": files, "folder_path": folder_path},
+            "yd_files/file_list.html",
+            {"files": files, "folders": folders, "folder_name": folder_path},
         )
 
     return HttpResponseNotFound("Folder not found.")

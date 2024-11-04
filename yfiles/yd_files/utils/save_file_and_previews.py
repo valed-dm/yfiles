@@ -22,13 +22,19 @@ def create_previews(file_obj, previews_data):
 
 def save_file_and_previews(file_data_list: list[dict], public_link: str) -> None:
     """
-    Saves file data and its associated previews to the database.
+    Saves file data and its associated previews to the database, deleting local records
+    for files that no longer exist in the remote source.
 
     Args:
         file_data_list (List[Dict]): List of file data dictionaries.
         public_link (str): The public link associated with the files.
     """
+    remote_paths = set()
+
     for file_data in file_data_list:
+        path = file_data.get("path")
+        remote_paths.add(path)
+
         try:
             with transaction.atomic():
                 file_obj, _ = File.objects.get_or_create(
@@ -51,3 +57,5 @@ def save_file_and_previews(file_data_list: list[dict], public_link: str) -> None
                 f"with path '{file_data.get('path')}': {e}"
             )
             logger.exception(msg)
+
+    File.objects.filter(public_link=public_link).exclude(path__in=remote_paths).delete()

@@ -16,6 +16,48 @@ License: MIT
 
 Moved to [settings](http://cookiecutter-django.readthedocs.io/en/latest/settings.html).
 
+Форма ввода публичной ссылки Яндекс Диск:
+
+[<img src="docs/images/img_01.png" width="700"/>]()
+
+Корневой каталог, файлы для загрузки отмечены:
+
+[<img src="docs/images/img_02.png" width="700"/>]()
+
+Просмотр вложенного каталога:
+
+[<img src="docs/images/img_03.png" width="700"/>]()
+
+Второй уровень вложенности:
+
+[<img src="docs/images/img_04.png" width="700"/>]()
+
+Пустая папка:
+
+[<img src="docs/images/img_05.png" width="700"/>]()
+
+Просмотр информации о файле:
+
+[<img src="docs/images/img_06.png" width="700"/>]()
+
+Превью файла:
+
+[<img src="docs/images/img_07.png" width="700"/>]()
+
+CELERY TASKS completed:
+
+[<img src="docs/images/img_08.png" width="700"/>]()
+
+Логи:
+
+[<img src="docs/images/img_09.png" width="700"/>]()
+
+[<img src="docs/images/img_10.png" width="700"/>]()
+
+Результат:
+
+[<img src="docs/images/img_11.png" width="300"/>]()
+
 ## Basic Commands
 
 ### Setting Up Your Users

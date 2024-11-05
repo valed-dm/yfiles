@@ -128,7 +128,11 @@ def folder_detail_view(request, folder_path: str) -> HttpResponse:
 
     if folder_files_data and "items" in folder_files_data:
         items = folder_files_data.get("items", [])
-        save_file_and_previews(file_data_list=items, public_link=public_link)
+        save_file_and_previews(
+            file_data_list=items,
+            public_link=public_link,
+            folder_path=folder_path,
+        )
 
         # Filter files directly in the subfolder
         files = File.objects.filter(

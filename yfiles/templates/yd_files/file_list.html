@@ -1,39 +1,45 @@
-{% load static %}
+{% extends "base.html" %}
 
-<h3>
-  <img src="{% static 'images/folder.svg' %}" alt="folder icon" />
-  &nbsp{{ folder_name }}
-</h3>
-<form method="post" action="{% url 'yd_files:bulk_download' %}">
-  {% csrf_token %}
-  <table>
-    <thead>
-      <tr>
-        <th>Select</th>
-        <th>Filename</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for folder in folders %}
-        <li>
-          <img src="{% static 'images/folder.svg' %}" alt="folder icon" />
-          &nbsp<a href="{% url 'yd_files:folder_detail' folder.path|slice:'1:' %}">{{ folder.name }}</a>
-        </li>
-      {% endfor %}
-      {% for file in files %}
+{% load static %}
+{% load custom_filters %}
+
+{% block content %}
+  <h3>
+    <img src="{% static 'images/icons8-folder.svg' %}" alt="folder icon" />
+    &nbsp{{ folder_name }}
+  </h3>
+  <form method="post" action="{% url 'yd_files:bulk_download' %}">
+    {% csrf_token %}
+    <table class="file_list">
+      <thead>
         <tr>
-          <td>
-            <label for='selected_files'>
-              Selected files:
-              <input type="checkbox" name="selected_files" value="{{ file.id }}" />
-            </label>
-          </td>
-          <td>
-            <a href="{% url 'yd_files:file_detail' file.id %}">{{ file.name }}</a>
-          </td>
+          <th>Select</th>
+          <th>Filename</th>
+          <th>Size</th>
         </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  <button type="submit">Download Selected</button>
-</form>
+      </thead>
+      <tbody>
+        {% for folder in folders %}
+          <li>
+            <img src="{% static 'images/icons8-folder.svg' %}" alt="folder icon" />
+            &nbsp<a href="{% url 'yd_files:folder_detail' folder.path|slice:'1:' %}">{{ folder.name }}</a>
+          </li>
+        {% endfor %}
+        {% for file in files %}
+          <tr class="file_list_border">
+            <td>
+              <input type="checkbox" name="selected_files" value="{{ file.id }}" />
+            </td>
+            <td>
+              <a style="white-space: nowrap"
+                 href="{% url 'yd_files:file_detail' file.id %}">{{ file.name }}</a>
+            </td>
+            <td>{{ file.size|convert_bytes }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <br />
+    <button type="submit">Download Selected</button>
+  </form>
+{% endblock content %}

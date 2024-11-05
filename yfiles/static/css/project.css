@@ -1,4 +1,7 @@
 /* These styles are generated from project.scss. */
+li {
+  list-style: none;
+}
 
 .alert-debug {
   color: black;
@@ -10,4 +13,14 @@
   color: #b94a48;
   background-color: #f2dede;
   border-color: #eed3d7;
+}
+
+.file_list {
+  border-collapse: collapse;
+  width: 50%;
+}
+
+.file_list_border {
+  border: 1px solid black;
+  padding: 3px;
 }

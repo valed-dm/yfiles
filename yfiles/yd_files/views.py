@@ -71,6 +71,7 @@ def folder_detail_view(request, folder_path: str = "") -> HttpResponse:
         save_file_and_previews(
             file_data_list=items,
             public_link=public_link,
+            folder_path=folder_path,
         )
 
         yandex_disk_data = (

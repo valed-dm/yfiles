@@ -21,7 +21,7 @@ from . import views
 app_name = "yd_files"
 urlpatterns = [
     path("", views.public_access_link_form_view, name="public_access_link_form"),
-    path("files/", views.file_list_view, name="file_list"),
+    path("files/", views.folder_detail_view, name="file_list"),
     path("files/<int:file_id>/", views.file_detail_view, name="file_detail"),
     path("folder/<path:folder_path>/", views.folder_detail_view, name="folder_detail"),
     path("files/download/", views.bulk_download_view, name="bulk_download"),

@@ -1,9 +1,13 @@
 from urllib.parse import quote
 
+from django.db.models import Case
+from django.db.models import CharField
+from django.db.models import Value
+from django.db.models import When
 from django.db.models.query_utils import Q
 from django.http import HttpResponseNotFound
-from django.http import HttpResponseRedirect
 from django.http.response import HttpResponse
+from django.http.response import HttpResponseRedirect
 from django.shortcuts import render
 
 from yfiles.yd_files.forms import YandexDiskPublicAccessLinkForm
@@ -42,47 +46,62 @@ def public_access_link_form_view(request) -> HttpResponse:
     return render(request, "yd_files/public_access_link_form.html", {"form": form})
 
 
-def file_list_view(request) -> HttpResponse:
+def folder_detail_view(request, folder_path: str = "") -> HttpResponse:
     """
-    Displays a list of files and top-level folders.
+    Displays the contents of a specific folder.
 
     Args:
         request (HttpRequest): The request object.
+        folder_path (str): The path of the folder.
 
     Returns:
-        HttpResponse: Rendered file list and folder view.
+        HttpResponse: Rendered folder detail view or error if folder not found.
     """
     public_link = request.session.get("public_link")
+    folder_path = "/" + folder_path.strip("/") if folder_path else ""
+    folder_path_encoded = quote(folder_path)
 
-    # Get all folders (type='dir')
-    all_folders = File.objects.filter(public_link=public_link, type="dir").values_list(
-        "path",
-        flat=True,
-    )
+    folder_files_data = fetch_yandex_disk_content(
+        link=public_link,
+        folder_path=folder_path_encoded,
+    ).get("_embedded", {})
 
-    # Build exclusion criteria for enclosed folders
-    folders_exclude_criteria = Q()
-    for folder_path in all_folders:
-        folders_exclude_criteria |= Q(path__startswith=folder_path + "/")
+    if folder_files_data and "items" in folder_files_data:
+        items = folder_files_data["items"]
+        save_file_and_previews(
+            file_data_list=items,
+            public_link=public_link,
+        )
 
-    # Fetch top-level folders only (those not enclosed in other folders)
-    top_level_folders = File.objects.filter(
-        public_link=public_link,
-        type="dir",
-    ).exclude(folders_exclude_criteria)
+        yandex_disk_data = (
+            File.objects.filter(
+                path__startswith=folder_path + "/",
+                public_link=public_link,
+            )
+            .exclude(
+                Q(
+                    path__regex=rf"^{folder_path}/[^/]+/[^/]+",
+                ),  # Exclude nested folders and files in nested folders
+            )
+            .annotate(
+                item_type=Case(
+                    When(type="dir", then=Value("folder")),
+                    default=Value("file"),
+                    output_field=CharField(),
+                ),
+            )
+        )
 
-    # Build exclusion criteria for files in folders
-    files_exclude_criteria = Q()
-    for folder_path in all_folders:
-        files_exclude_criteria |= Q(path__startswith=folder_path)
+        return render(
+            request,
+            "yd_files/file_list.html",
+            {
+                "items": yandex_disk_data,
+                "folder_name": folder_path or "/",
+            },
+        )
 
-    # Fetch all files from the database and their previews
-    files = File.objects.filter(public_link=public_link).exclude(files_exclude_criteria)
-    return render(
-        request,
-        "yd_files/file_list.html",
-        {"files": files, "folders": top_level_folders, "folder_name": "/"},
-    )
+    return HttpResponseNotFound("Folder not found.")
 
 
 def file_detail_view(request, file_id: int) -> HttpResponse:
@@ -103,61 +122,6 @@ def file_detail_view(request, file_id: int) -> HttpResponse:
         "yd_files/file_detail.html",
         {"file": file, "previews": previews},
     )
-
-
-def folder_detail_view(request, folder_path: str) -> HttpResponse:
-    """
-    Displays the contents of a specific folder.
-
-    Args:
-        request (HttpRequest): The request object.
-        folder_path (str): The path of the folder.
-
-    Returns:
-        HttpResponse: Rendered folder detail view or error if folder not found.
-    """
-    folder_path = "/" + folder_path.rstrip("/")
-    public_link = request.session.get("public_link")
-    folder_path_encoded = quote(folder_path)
-
-    folder_files_data = fetch_yandex_disk_content(
-        link=public_link,
-        folder_path=folder_path_encoded,
-    )
-    folder_files_data = folder_files_data.get("_embedded", {})
-
-    if folder_files_data and "items" in folder_files_data:
-        items = folder_files_data.get("items", [])
-        save_file_and_previews(
-            file_data_list=items,
-            public_link=public_link,
-            folder_path=folder_path,
-        )
-
-        # Filter files directly in the subfolder
-        files = File.objects.filter(
-            path__startswith=folder_path + "/",
-            public_link=public_link,
-            # Exclude files within nested subfolders
-        ).exclude(
-            Q(path__regex=rf"^{folder_path}/.*/") | Q(path=folder_path) | Q(type="dir"),
-        )
-
-        # Filter only direct subfolders within the folder
-        folders = File.objects.filter(
-            path__startswith=folder_path + "/",
-            public_link=public_link,
-            type="dir",
-            # Exclude nested folders
-        ).exclude(path__regex=rf"^{folder_path}/.*/.*/")
-
-        return render(
-            request,
-            "yd_files/file_list.html",
-            {"files": files, "folders": folders, "folder_name": folder_path},
-        )
-
-    return HttpResponseNotFound("Folder not found.")
 
 
 def bulk_download_view(request) -> HttpResponse:

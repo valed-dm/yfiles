@@ -6,7 +6,7 @@
 {% block content %}
   <h3>
     <img src="{% static 'images/icons8-folder.svg' %}" alt="folder icon" />
-    &nbsp{{ folder_name }}
+    &nbsp{{ folder_name|default:".." }}
   </h3>
   <form method="post" action="{% url 'yd_files:bulk_download' %}">
     {% csrf_token %}
@@ -19,23 +19,24 @@
         </tr>
       </thead>
       <tbody>
-        {% for folder in folders %}
-          <li>
-            <img src="{% static 'images/icons8-folder.svg' %}" alt="folder icon" />
-            &nbsp<a href="{% url 'yd_files:folder_detail' folder.path|slice:'1:' %}">{{ folder.name }}</a>
-          </li>
-        {% endfor %}
-        {% for file in files %}
-          <tr class="file_list_border">
-            <td>
-              <input type="checkbox" name="selected_files" value="{{ file.id }}" />
-            </td>
-            <td>
-              <a style="white-space: nowrap"
-                 href="{% url 'yd_files:file_detail' file.id %}">{{ file.name }}</a>
-            </td>
-            <td>{{ file.size|convert_bytes }}</td>
-          </tr>
+        {% for item in items %}
+          {% if item.item_type == "folder" %}
+            <li>
+              <img src="{% static 'images/icons8-folder.svg' %}" alt="folder icon" />
+              &nbsp<a href="{% url 'yd_files:folder_detail' item.path|slice:'1:' %}">{{ item.name }}</a>
+            </li>
+          {% else %}
+            <tr class="file_list_border">
+              <td>
+                <input type="checkbox" name="selected_files" value="{{ item.id }}" />
+              </td>
+              <td>
+                <a style="white-space: nowrap"
+                   href="{% url 'yd_files:file_detail' item.id %}">{{ item.name }}</a>
+              </td>
+              <td>{{ item.size|convert_bytes }}</td>
+            </tr>
+          {% endif %}
         {% endfor %}
       </tbody>
     </table>

@@ -14,7 +14,8 @@ from yfiles.yd_files.forms import YandexDiskPublicAccessLinkForm
 from yfiles.yd_files.models import File
 from yfiles.yd_files.utils.download_manager import FileDownloadManager
 from yfiles.yd_files.utils.fetch_yandex_disk_content import fetch_yandex_disk_content
-from yfiles.yd_files.utils.save_file_and_previews import save_file_and_previews
+from yfiles.yd_files.utils.save_file_and_previews import create_previews_for_folder
+from yfiles.yd_files.utils.save_file_and_previews import save_files
 
 
 def public_access_link_form_view(request) -> HttpResponse:
@@ -31,15 +32,8 @@ def public_access_link_form_view(request) -> HttpResponse:
         form = YandexDiskPublicAccessLinkForm(request.POST)
         if form.is_valid():
             public_link = form.cleaned_data["public_link"]
-            # Store the public link in the session
             request.session["public_link"] = public_link
-
-            # Fetch Yandex Disk data
-            files_data = fetch_yandex_disk_content(link=public_link)
-            if files_data:
-                items = files_data.get("_embedded", {}).get("items", [])
-                save_file_and_previews(file_data_list=items, public_link=public_link)
-                return HttpResponseRedirect("files")
+            return HttpResponseRedirect("files")
     else:
         form = YandexDiskPublicAccessLinkForm()
 
@@ -67,11 +61,19 @@ def folder_detail_view(request, folder_path: str = "") -> HttpResponse:
     ).get("_embedded", {})
 
     if folder_files_data and "items" in folder_files_data:
-        items = folder_files_data["items"]
-        save_file_and_previews(
+        items = folder_files_data.get("items")
+        save_files(
             file_data_list=items,
             public_link=public_link,
             folder_path=folder_path,
+        )
+
+        create_previews_for_folder(
+            public_link=public_link,
+            folder_path=folder_path,
+            previews_data=[
+                {item.get("name"): item.get("sizes", None)} for item in items
+            ],
         )
 
         yandex_disk_data = (

@@ -251,3 +251,64 @@ class TestFileDetailView:
         response = client.get(url)
 
         assert response.status_code == HTTPStatus.NOT_FOUND
+
+
+@pytest.mark.django_db
+class TestBulkDownloadView:
+    @pytest.fixture
+    def setup_files(self):
+        files = [
+            File.objects.create(
+                public_link="mock_public_link",
+                path="/test_folder/file1.pdf",
+                name="file1.pdf",
+                size=2460724,
+                type="file",
+                mime_type="application/pdf",
+                created="2022-02-03 13:46:08+03",
+                modified="2022-02-03 13:46:08+03",
+            ),
+            File.objects.create(
+                public_link="mock_public_link",
+                path="/test_folder/file2.pdf",
+                name="file2.pdf",
+                size=3460724,
+                type="file",
+                mime_type="application/pdf",
+                created="2022-02-03 13:46:08+03",
+                modified="2022-02-03 13:46:08+03",
+            ),
+        ]
+        return [
+            str(file.id) for file in files
+        ]  # Return IDs as strings for form submission
+
+    def test_bulk_download_success(self, client, setup_files):
+        url = reverse("yd_files:bulk_download")
+
+        # Mock the FileDownloadManager's download_files method
+        with patch("yfiles.yd_files.views.FileDownloadManager") as mock_manager:
+            mock_manager_instance = mock_manager.return_value
+            # Simulate successful download
+            mock_manager_instance.download_files.return_value = None
+
+            # Make POST request with selected files
+            response = client.post(url, {"selected_files": setup_files})
+
+            # Assertions
+            assert response.status_code == HTTPStatus.OK
+            assert b"Files downloaded successfully." in response.content
+            mock_manager.assert_called_once_with(
+                setup_files,
+            )  # Ensure manager is initialized with selected IDs
+            mock_manager_instance.download_files.assert_called_once()
+
+    def test_bulk_download_no_files_selected(self, client):
+        url = reverse("yd_files:bulk_download")
+
+        # Make POST request without any selected files
+        response = client.post(url, {"selected_files": []})
+
+        # Assertions
+        assert response.status_code == HTTPStatus.OK
+        assert b"No files selected" in response.content

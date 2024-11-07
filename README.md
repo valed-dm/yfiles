@@ -1,12 +1,3 @@
-# yfiles
-
-Yandex Disk multiprocessing files loader with download auto strategy.
-
-Now auto files download strategy implemented in yd_files/utils/download_manager.py.
-It includes sequential, parallel, background downloading which depends on file size
-(threshold 50Mb) and hardware core's number. First testing passed,
-docs and user interface are coming soon.
-
 [![Built with Cookiecutter Django](https://img.shields.io/badge/built%20with-Cookiecutter%20Django-ff69b4.svg?logo=cookiecutter)](https://github.com/cookiecutter/cookiecutter-django/)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 
@@ -15,6 +6,31 @@ License: MIT
 ## Settings
 
 Moved to [settings](http://cookiecutter-django.readthedocs.io/en/latest/settings.html).
+
+# yfiles
+
+Yandex Disk multiprocessing files loader with download auto strategy.
+
+Now auto files download strategy implemented in yd_files/utils/download_manager.py.
+It includes sequential, parallel, background downloading which depends on file size
+(threshold 50Mb) and hardware core's number.
+
+Особенности реализации загрузчика:
+
+Класс TimeoutRequest дополняет библиотеку 'requests' предоставляя возможность управления величиной 'total timeout'
+в тех случаях, когда использование connect, read timeout недостаточно для управления долгими загрузками.
+Таким образом мы гарантировано завершаем загрузку в установленное время или получаем 'TimeoutError',
+предотвращая зависание программы и избегая неэффективного использования ресурсов.
+Для обеспечения межпроцессного взаимодействия используется 'threading.Event()': yd_files/utils/timeout_requests.py.
+Фоновый поток отслеживает задержку времени и по истечении срока останавливает запрос, логируя ошибку.
+Общее время работы кода ускорено за счет прерывания ожидания если запрос успешно выполнен.
+
+Класс FileDownloadManager фильтрует файлы по из размеру оптимизируя используемый метод для загрузки.
+Большие файлы (параметр 'size_threshold') загружаются в фоновом режиме с использованием Celery, в случае с малыми файлами
+выбирается последовательная или параллельная загрузка в зависимости от ресурсов системы. Определяя количество доступных ядер
+мы не перегружаем систему, обеспечивая адаптивное управление загрузкой: yd_files/utils/download_manager.py.
+
+
 
 Форма ввода публичной ссылки Яндекс Диск:
 

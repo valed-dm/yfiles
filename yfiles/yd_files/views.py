@@ -131,9 +131,10 @@ def file_detail_view(request, file_id: int) -> HttpResponse:
 def bulk_download_view(request) -> HttpResponse:
     if request.method == "POST":
         selected_file_ids = request.POST.getlist("selected_files")
-        manager = FileDownloadManager(selected_file_ids)
+        if not selected_file_ids:
+            return HttpResponse("No files selected")
 
-        # Execute download based on the size criteria
+        manager = FileDownloadManager(selected_file_ids)
         manager.download_files()
 
         return HttpResponse("Files downloaded successfully.")

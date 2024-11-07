@@ -7,6 +7,7 @@ from django.urls import reverse
 
 from yfiles.yd_files.forms import YandexDiskPublicAccessLinkForm
 from yfiles.yd_files.models import File
+from yfiles.yd_files.models import Preview
 
 
 @pytest.mark.django_db
@@ -197,3 +198,56 @@ class TestFolderDetailView:
         # Assertions
         assert response.status_code == HTTPStatus.NOT_FOUND
         assert b"Folder not found" in response.content
+
+
+@pytest.mark.django_db
+class TestFileDetailView:
+    @pytest.fixture
+    def file_with_previews(self):
+        # Create a file with associated previews for testing
+        file = File.objects.create(
+            public_link="mock_public_link",
+            path="/sample_file.png",
+            name="sample_file.png",
+            size=123456,
+            type="file",
+            mime_type="image/png",
+            created="2023-10-01 12:00:00+03",
+            modified="2023-10-01 12:00:00+03",
+        )
+        Preview.objects.create(
+            file=file,
+            size_name="XXL",
+            preview_url="http://example.com/sample_preview_1024.png",
+        )
+        Preview.objects.create(
+            file=file,
+            size_name="XXXL",
+            preview_url="http://example.com/sample_preview_2048.png",
+        )
+        return file
+
+    def test_file_detail_view_success(self, client, file_with_previews):
+        url = reverse("yd_files:file_detail", kwargs={"file_id": file_with_previews.id})
+        response = client.get(url)
+
+        # Assertions
+        assert response.status_code == HTTPStatus.OK
+        assert "yd_files/file_detail.html" in [t.name for t in response.templates]
+        assert "file" in response.context
+        assert "previews" in response.context
+        assert response.context["file"] == file_with_previews
+
+        # Check that the correct previews are in the context
+        previews = response.context["previews"]
+        qty = 2
+        assert len(previews) == qty
+        assert any(preview.size_name == "XXL" for preview in previews)
+        assert any(preview.size_name == "XXXL" for preview in previews)
+
+    def test_file_not_found(self, client):
+        # Make a request for a non-existent file ID
+        url = reverse("yd_files:file_detail", kwargs={"file_id": 9999})
+        response = client.get(url)
+
+        assert response.status_code == HTTPStatus.NOT_FOUND

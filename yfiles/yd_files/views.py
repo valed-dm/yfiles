@@ -8,6 +8,7 @@ from django.db.models.query_utils import Q
 from django.http import HttpResponseNotFound
 from django.http.response import HttpResponse
 from django.http.response import HttpResponseRedirect
+from django.shortcuts import get_object_or_404
 from django.shortcuts import render
 
 from yfiles.yd_files.forms import YandexDiskPublicAccessLinkForm
@@ -116,9 +117,9 @@ def file_detail_view(request, file_id: int) -> HttpResponse:
         file_id (int): The ID of the file.
 
     Returns:
-        HttpResponse: Rendered file detail view.
+        HttpResponse: Rendered file detail view or 404 if file not found.
     """
-    file = File.objects.get(id=file_id)
+    file = get_object_or_404(File, id=file_id)
     previews = file.previews.all()
     return render(
         request,

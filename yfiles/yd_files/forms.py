@@ -23,4 +23,14 @@ class YandexDiskPublicAccessLinkForm(forms.Form):
       length of the link is limited to 500 characters.
     """
 
-    public_link = forms.CharField(label="Yandex Disk Files Public Link", max_length=500)
+    public_link = forms.CharField(
+        max_length=500,
+        label="Yandex Disk Files Public Link",
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Yandex Disk Files Public Link",
+            },
+        ),
+        help_text="Enter the public link to Yandex Disk files.",
+    )

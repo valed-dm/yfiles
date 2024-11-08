@@ -10,7 +10,6 @@ from yfiles.yd_files.models import File
 from yfiles.yd_files.models import Preview
 
 
-@pytest.mark.django_db
 class TestPublicAccessLinkFormView:
     @pytest.fixture
     def client(self):
@@ -51,7 +50,6 @@ class TestPublicAccessLinkFormView:
         ]
 
 
-@pytest.mark.django_db
 class TestFolderDetailView:
     @pytest.fixture
     def mock_fetch_content(self):
@@ -200,7 +198,6 @@ class TestFolderDetailView:
         assert b"Folder not found" in response.content
 
 
-@pytest.mark.django_db
 class TestFileDetailView:
     @pytest.fixture
     def file_with_previews(self):
@@ -253,7 +250,6 @@ class TestFileDetailView:
         assert response.status_code == HTTPStatus.NOT_FOUND
 
 
-@pytest.mark.django_db
 class TestBulkDownloadView:
     @pytest.fixture
     def setup_files(self):

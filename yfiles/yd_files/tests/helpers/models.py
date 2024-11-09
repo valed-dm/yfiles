@@ -129,11 +129,20 @@ class BaseModelFieldTest:
 
 class BaseTestFieldRelated(BaseModelFieldTest):
     related_model = None
+    related_name: str | None = None
 
     def test_has_correct_related_model(self):
         if self.field.is_relation:
             assert (
                 self.field.related_model == self.related_model
             ), f"{self.field_name} related model mismatch."
+        else:
+            pytest.skip(f"{self.field_name} is not a related field.")
+
+    def test_has_correct_related_name(self):
+        if self.field.is_relation:
+            assert (
+                self.field.related_query_name() == self.related_name
+            ), f"{self.field_name} related name mismatch."
         else:
             pytest.skip(f"{self.field_name} is not a related field.")

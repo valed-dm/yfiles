@@ -1,7 +1,3 @@
-# yfiles
-
-Yandex Disk multiprocessing files loader
-
 [![Built with Cookiecutter Django](https://img.shields.io/badge/built%20with-Cookiecutter%20Django-ff69b4.svg?logo=cookiecutter)](https://github.com/cookiecutter/cookiecutter-django/)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 
@@ -10,6 +6,77 @@ License: MIT
 ## Settings
 
 Moved to [settings](http://cookiecutter-django.readthedocs.io/en/latest/settings.html).
+
+# yfiles
+
+Yandex Disk multiprocessing files loader with download auto strategy.
+
+Now auto files download strategy implemented in yd_files/utils/download_manager.py.
+It includes sequential, parallel, background downloading which depends on file size
+(threshold 50Mb) and hardware core's number.
+
+Особенности реализации загрузчика:
+
+Класс TimeoutRequest дополняет библиотеку 'requests' предоставляя возможность управления величиной 'total timeout'
+в тех случаях, когда использование connect, read timeout недостаточно для управления долгими загрузками.
+Таким образом мы гарантировано завершаем загрузку в установленное время или получаем 'TimeoutError',
+предотвращая зависание программы и избегая неэффективного использования ресурсов.
+Для обеспечения межпроцессного взаимодействия используется 'threading.Event()': yd_files/utils/timeout_requests.py.
+Фоновый поток отслеживает задержку времени и по истечении срока останавливает запрос, логируя ошибку.
+Общее время работы кода ускорено за счет прерывания ожидания если запрос успешно выполнен.
+
+Класс FileDownloadManager фильтрует файлы по из размеру оптимизируя используемый метод для загрузки.
+Большие файлы (параметр 'size_threshold') загружаются в фоновом режиме с использованием Celery, в случае с малыми файлами
+выбирается последовательная или параллельная загрузка в зависимости от ресурсов системы. Определяя количество доступных ядер
+мы не перегружаем систему, обеспечивая адаптивное управление загрузкой: yd_files/utils/download_manager.py.
+
+
+
+Форма ввода публичной ссылки Яндекс Диск:
+
+[<img src="docs/images/img_01.png" width="700"/>]()
+
+Корневой каталог, файлы для загрузки отмечены:
+
+[<img src="docs/images/img_02.png" width="700"/>]()
+
+Просмотр вложенного каталога:
+
+[<img src="docs/images/img_03.png" width="700"/>]()
+
+Второй уровень вложенности:
+
+[<img src="docs/images/img_04.png" width="700"/>]()
+
+Пустая папка:
+
+[<img src="docs/images/img_05.png" width="700"/>]()
+
+Просмотр информации о файле:
+
+[<img src="docs/images/img_06.png" width="700"/>]()
+
+Превью файла:
+
+[<img src="docs/images/img_07.png" width="700"/>]()
+
+CELERY TASKS completed:
+
+[<img src="docs/images/img_08.png" width="700"/>]()
+
+Логи:
+
+[<img src="docs/images/img_09.png" width="700"/>]()
+
+[<img src="docs/images/img_10.png" width="700"/>]()
+
+Результат:
+
+[<img src="docs/images/img_11.png" width="300"/>]()
+
+Покрытие тестами:
+
+[<img src="docs/images/img_12.png" width="600"/>]()
 
 ## Basic Commands
 

@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% load static %}
+{% load custom_filters %}
+
+{% block content %}
+  <h3>
+    <img src="{% static 'images/icons8-folder.svg' %}" alt="folder icon" />
+    &nbsp{{ folder_name|default:".." }}
+  </h3>
+  <form method="post" action="{% url 'yd_files:bulk_download' %}">
+    {% csrf_token %}
+    <table class="file_list">
+      <thead>
+        <tr>
+          <th>Select</th>
+          <th>Filename</th>
+          <th>Size</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in items %}
+          {% if item.item_type == "folder" %}
+            <li>
+              <img src="{% static 'images/icons8-folder.svg' %}" alt="folder icon" />
+              &nbsp<a href="{% url 'yd_files:folder_detail' item.path|slice:'1:' %}">{{ item.name }}</a>
+            </li>
+          {% else %}
+            <tr class="file_list_border">
+              <td>
+                <input type="checkbox" name="selected_files" value="{{ item.id }}" />
+              </td>
+              <td>
+                <a style="white-space: nowrap"
+                   href="{% url 'yd_files:file_detail' item.id %}">{{ item.name }}</a>
+              </td>
+              <td>{{ item.size|convert_bytes }}</td>
+            </tr>
+          {% endif %}
+        {% endfor %}
+      </tbody>
+    </table>
+    <br />
+    <button type="submit">Download Selected</button>
+  </form>
+{% endblock content %}

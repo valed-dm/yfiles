@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% load custom_filters %}
+
+{% block content %}
+  <h3>{{ file.name }}</h3>
+  <span>Type: {{ file.type }}</span>
+  <br />
+  <span>MIME Type: {{ file.mime_type }}</span>
+  <br />
+  <span>Size: {{ file.size|convert_bytes }}</span>
+  <br />
+  <h3>Previews</h3>
+  <ul>
+    {% for preview in previews %}
+      <li>
+        <a href="{{ preview.preview_url }}">{{ preview.size_name }}</a>
+      </li>
+    {% endfor %}
+  </ul>
+{% endblock content %}

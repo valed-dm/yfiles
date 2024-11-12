@@ -5,8 +5,19 @@ from yfiles.users.tests.factories import UserFactory
 
 
 @pytest.fixture(autouse=True)
+def _enable_db_access_for_all_tests(db):
+    pass
+
+
+@pytest.fixture(autouse=True)
 def _media_storage(settings, tmpdir) -> None:
     settings.MEDIA_ROOT = tmpdir.strpath
+
+
+@pytest.fixture(autouse=True)
+def _static_files(settings, tmpdir) -> None:
+    settings.STATICFILES_DIRS = []
+    settings.STATIC_ROOT = tmpdir.mkdir("staticfiles")
 
 
 @pytest.fixture

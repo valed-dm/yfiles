@@ -74,6 +74,10 @@ CELERY TASKS completed:
 
 [<img src="docs/images/img_11.png" width="300"/>]()
 
+Покрытие тестами:
+
+[<img src="docs/images/img_12.png" width="600"/>]()
+
 ## Basic Commands
 
 ### Setting Up Your Users
